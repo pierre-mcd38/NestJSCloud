@@ -65,6 +65,14 @@ Pour lancer les tests :
 npm run test
 ```
 
+- Vérifie que le controller existe
+- Vérifie la récupération de tous les jeux
+- Vérifie que findAll retourne un tableau
+- Création d’un jeu
+- Récupération d’un jeu par id
+- Mise à jour d’un jeu
+- Suppression d’un jeu
+
 ## Stockage des données
 Les données sont stockées localement dans le fichier :
 games.json
