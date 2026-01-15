@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Games CRUD</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🎮 Games CRUD</h1>
+
+    <form onsubmit="submitGame(event)">
+      <input id="title" placeholder="Title" required />
+      <input id="genre" placeholder="Genre" required />
+      <input id="platform" placeholder="Platform" required />
+      <input id="year" type="number" placeholder="Year" required />
+      <button type="submit">Save Game</button>
+    </form>
+
+    <ul id="games"></ul>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:3000/games';
+    let editId = null;
+
+    async function loadGames() {
+      const res = await fetch(API_URL);
+      const games = await res.json();
+
+      const list = document.getElementById('games');
+      list.innerHTML = '';
+
+      games.forEach(game => {
+        const li = document.createElement('li');
+
+        li.innerHTML = `
+          <span>
+            <strong>${game.title}</strong> (${game.platform}) - ${game.year}
+          </span>
+          <div class="actions">
+            <button class="edit" onclick="editGame(${game.id})">✏️</button>
+            <button class="delete" onclick="deleteGame(${game.id})">❌</button>
+          </div>
+        `;
+
+        list.appendChild(li);
+      });
+    }
+
+    async function submitGame(event) {
+      event.preventDefault();
+
+      const game = {
+        title: document.getElementById('title').value,
+        genre: document.getElementById('genre').value,
+        platform: document.getElementById('platform').value,
+        year: Number(document.getElementById('year').value),
+      };
+
+      if (editId) {
+        await fetch(`${API_URL}/${editId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(game),
+        });
+        editId = null;
+      } else {
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(game),
+        });
+      }
+
+      event.target.reset();
+      loadGames();
+    }
+
+    async function editGame(id) {
+      const res = await fetch(`${API_URL}/${id}`);
+      const game = await res.json();
+
+      document.getElementById('title').value = game.title;
+      document.getElementById('genre').value = game.genre;
+      document.getElementById('platform').value = game.platform;
+      document.getElementById('year').value = game.year;
+
+      editId = id;
+    }
+
+    async function deleteGame(id) {
+      await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+      loadGames();
+    }
+
+    loadGames();
+  </script>
+</body>
+</html>
